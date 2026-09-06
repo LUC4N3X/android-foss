@@ -1,0 +1,40 @@
+name: Add Levyra
+
+on:
+  push:
+    branches:
+      - add-levyra
+
+permissions:
+  contents: write
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: add-levyra
+      - name: Add Levyra to streaming players
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          text = p.read_text(encoding='utf-8')
+          marker = '* [**Kreate**](https://github.com/knighthat/Kreate) <sup>**[[F-Droid](https://f-droid.org/packages/me.knighthat.kreate)]**</sup>'
+          levyra = '* [**Levyra**](https://github.com/LUC4N3X/Levyra-deepsound) <sup>**[[F-Droid](https://f-droid.org/packages/com.luc4n3x.levyra)]**</sup>'
+          if levyra in text:
+              raise SystemExit(0)
+          if marker not in text:
+              raise SystemExit('Kreate marker not found')
+          p.write_text(text.replace(marker, marker + '\n' + levyra, 1), encoding='utf-8')
+          PY
+          git diff --check
+          git config user.name "LUC4N3X"
+          git config user.email "241364318+LUC4N3X@users.noreply.github.com"
+          git add README.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Add Levyra"
+            git push origin HEAD:add-levyra
+          fi
